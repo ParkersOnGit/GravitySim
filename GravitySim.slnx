@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="GravitySim/GravitySim.vcxproj" />
+  <Project Path="GravitySim/GravitySim.vcxproj" Id="9c80a201-fe0a-4433-adee-d5faa064095c" />
 </Solution>
