@@ -6,6 +6,55 @@ int main(int argc, char* argv[]) {
 		SDL_Log("Failed to initialize SDL: %s\n", SDL_GetError());
 		return 1;
 	}
+
+	// Create window.
+	SDL_Window* window = SDL_CreateWindow("Boid Simulator", 1440, 900, NULL);
+	if (!window) {
+		SDL_Log("Failed to create window: %s\n", SDL_GetError());
+		SDL_Quit();
+		return 1;
+	}
+
+	// Create renderer.
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
+	if (!renderer) {
+		SDL_Log("Failed to create renderer: %s\n", SDL_GetError());
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return 1;
+	}
+
+	// Useful variables.
+	Uint64 prevTime = SDL_GetPerformanceCounter();
+	Uint64 currentTime = 0;
+	float deltaTime = 0.0f;
+
+	bool close = false;
+	SDL_Event e;
+
+	// Main loop.
+	while (!close) {
+		// Calculate deltaTime.
+		currentTime = SDL_GetPerformanceCounter();
+		deltaTime = (float)(currentTime - prevTime) / (float)SDL_GetPerformanceFrequency();
+		prevTime = currentTime;
+
+		// Get events.
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_EVENT_QUIT) close = true;
+		}
+
+		// Render stuff.
+		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
+		SDL_RenderClear(renderer);
+
+		SDL_RenderPresent(renderer);
+	}
 	
+	// Cleanup.
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
 	return 0;
 }
