@@ -14,7 +14,7 @@ struct Body {
 	Vector2f velocity;
 	
 	void render(SDL_Renderer* renderer) {
-		const int resolution = 360;
+		const int resolution = 180;
 
 		SDL_Vertex vertices[resolution + 1];
 		vertices[0].position = SDL_FPoint{position.x, position.y};
