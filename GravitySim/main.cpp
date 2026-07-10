@@ -12,12 +12,27 @@ struct Body {
 	float radius;
 
 	Vector2f velocity;
-
+	
 	void render(SDL_Renderer* renderer) {
-		for (int i = 0; i < 360; i++) {
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			SDL_RenderPoint(renderer, 500 + cos(i) * 200, 450 + sin(i) * 200);
+		const int resolution = 360;
+
+		SDL_Vertex vertices[resolution + 1];
+		vertices[0].position = SDL_FPoint{position.x, position.y};
+		vertices[0].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+
+		int indices[resolution * 3];
+
+		for (int i = 1; i <= resolution; i++) {
+			vertices[i].position = SDL_FPoint{ position.x + (float)cos(i) * radius, position.y + (float)sin(i) * radius };
+			vertices[i].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+			indices[(i - 1) * 3 + 0] = 0;
+			indices[(i - 1) * 3 + 1] = i;
+			indices[(i - 1) * 3 + 2] = (i % 360) + 1;
 		}
+
+		SDL_RenderGeometry(renderer, NULL, vertices, resolution + 1, indices, resolution * 3);
 	}
 };
 
@@ -47,7 +62,7 @@ int main(int argc, char* argv[]) {
 
 	// Create debug object.
 	Body debbie = {
-		{ 0, 2 },
+		{ 500, 450 },
 		50.0f,
 		40.0f,
 	};
