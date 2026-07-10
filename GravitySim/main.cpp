@@ -1,4 +1,4 @@
-#include <iostream>
+#include <vector>
 
 #include <SDL3/SDL.h>
 
@@ -14,12 +14,11 @@ struct Body {
 	Vector2f velocity;
 	
 	void render(SDL_Renderer* renderer) {
-		const int resolution = 10;
+		const int resolution = 16;
 
 		SDL_Vertex vertices[resolution + 1];
 		vertices[0].position = SDL_FPoint{position.x, position.y};
 		vertices[0].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-
 
 		int indices[resolution * 3];
 
@@ -62,12 +61,23 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	// Create debug object.
+	// Create a vector of all bodies.
+	std::vector<Body> bodies;
+
+	// Create debug objects.
 	Body debbie = {
 		{ 500, 450 },
 		50.0f,
-		40.0f,
+		10.0f,
 	};
+	Body debrah = {
+		{ 800, 350 },
+		50.0f,
+		20.0f,
+	};
+
+	bodies.push_back(debbie);
+	bodies.push_back(debrah);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -93,7 +103,9 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
 
-		debbie.render(renderer);
+		for (Body body : bodies) {
+			body.render(renderer);
+		}
 
 		SDL_RenderPresent(renderer);
 	}
