@@ -1,4 +1,25 @@
+#include <iostream>
+
 #include <SDL3/SDL.h>
+
+struct Vector2f { 
+	float x, y; 
+};
+
+struct Body {
+	Vector2f position;
+	float mass;
+	float radius;
+
+	Vector2f velocity;
+
+	void render(SDL_Renderer* renderer) {
+		for (int i = 0; i < 360; i++) {
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_RenderPoint(renderer, 500 + cos(i) * 200, 450 + sin(i) * 200);
+		}
+	}
+};
 
 int main(int argc, char* argv[]) {
 	// Initialize SDL.
@@ -8,7 +29,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Create window.
-	SDL_Window* window = SDL_CreateWindow("Boid Simulator", 1440, 900, NULL);
+	SDL_Window* window = SDL_CreateWindow("2D Gravity Simulator", 1440, 900, NULL);
 	if (!window) {
 		SDL_Log("Failed to create window: %s\n", SDL_GetError());
 		SDL_Quit();
@@ -23,6 +44,13 @@ int main(int argc, char* argv[]) {
 		SDL_Quit();
 		return 1;
 	}
+
+	// Create debug object.
+	Body debbie = {
+		{ 0, 2 },
+		50.0f,
+		40.0f,
+	};
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -47,6 +75,8 @@ int main(int argc, char* argv[]) {
 		// Render stuff.
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
+
+		debbie.render(renderer);
 
 		SDL_RenderPresent(renderer);
 	}
