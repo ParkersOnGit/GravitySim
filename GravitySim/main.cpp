@@ -14,7 +14,7 @@ struct Body {
 	Vector2f velocity;
 	
 	void render(SDL_Renderer* renderer) {
-		const int resolution = 180;
+		const int resolution = 10;
 
 		SDL_Vertex vertices[resolution + 1];
 		vertices[0].position = SDL_FPoint{position.x, position.y};
@@ -24,12 +24,14 @@ struct Body {
 		int indices[resolution * 3];
 
 		for (int i = 1; i <= resolution; i++) {
-			vertices[i].position = SDL_FPoint{ position.x + (float)cos(i) * radius, position.y + (float)sin(i) * radius };
+			float angle = i * 2.0f * 3.14159f / resolution;
+
+			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius, position.y + (float)sin(angle) * radius };
 			vertices[i].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
 			indices[(i - 1) * 3 + 1] = i;
-			indices[(i - 1) * 3 + 2] = (i % 360) + 1;
+			indices[(i - 1) * 3 + 2] = (i % resolution) + 1;
 		}
 
 		SDL_RenderGeometry(renderer, NULL, vertices, resolution + 1, indices, resolution * 3);
