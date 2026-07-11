@@ -14,7 +14,9 @@ struct Body {
 	Vector2f velocity; // Meters
 
 	void update(const std::vector<Body*> &bodies) {
-		
+
+
+
 		for (Body* body : bodies) {
 			if (body == this) continue;
 
@@ -26,7 +28,12 @@ struct Body {
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
 			float gravitationalForce = body->mass * mass / distanceSquared; // Newtons
 
-			std::cout << gravitationalForce << "\n";
+			// Get the delta position to point towards the object.
+
+
+			velocity.x += deltaX * gravitationalForce;
+
+			std::cout << deltaX * gravitationalForce << "\n";
 		}
 		std::cout << "\n\n";
 	}
