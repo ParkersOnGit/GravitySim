@@ -19,12 +19,12 @@ struct Body {
 			if (body == this) continue;
 
 			// Using distance formula get distance squared.
-			float deltaX = body->position.x - this->position.x;
-			float deltaY = body->position.y - this->position.y;
+			float deltaX = body->position.x - position.x;
+			float deltaY = body->position.y - position.y;
 			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = body->mass * this->mass / distanceSquared; // Newtons
+			float gravitationalForce = body->mass * mass / distanceSquared; // Newtons
 
 			std::cout << gravitationalForce << "\n";
 		}
@@ -57,6 +57,10 @@ struct Body {
 		}
 
 		SDL_RenderGeometry(renderer, NULL, vertices, resolution + 1, indices, resolution * 3);
+
+		// Draw velocity vector.
+		SDL_SetRenderDrawColor(renderer, 255, 55, 35, 255);
+		SDL_RenderLine(renderer, position.x, position.y, position.x + velocity.x, position.y + velocity.y);
 	}
 };
 
@@ -99,7 +103,7 @@ int main(int argc, char* argv[]) {
 		200.0f,
 	};
 
-	debbie.velocity = Vector2f(100, 100);
+	debbie.velocity = Vector2f(10, 10);
 
 	bodies.push_back(&debbie);
 	bodies.push_back(&debrah);
