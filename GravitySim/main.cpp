@@ -1,9 +1,12 @@
 #include <vector>
+#include <iostream>
 
 #include <SDL3/SDL.h>
 
 struct Vector2f { 
 	float x, y; 
+	Vector2f operator+=(const Vector2f &vector) { return Vector2f(this->x + vector.x, this->y + vector.y); }
+	Vector2f operator*(const float value) { return Vector2f(this->x * value, this->y * value); }
 };
 
 struct Body {
@@ -12,6 +15,16 @@ struct Body {
 	float radius;
 
 	Vector2f velocity;
+
+	void update(std::vector<Body> bodies) {
+		for (Body &body : bodies) {
+			if (&body == this) continue;
+		}
+	}
+
+	void move(float deltaTime) {
+		position += velocity * deltaTime;
+	}
 	
 	void render(SDL_Renderer* renderer) {
 		const int resolution = 16;
@@ -26,7 +39,7 @@ struct Body {
 			float angle = i * 2.0f * 3.14159f / resolution;
 
 			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius, position.y + (float)sin(angle) * radius };
-			vertices[i].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+			vertices[i].color = SDL_FColor{ 0.85f, 0.85f, 0.85f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
 			indices[(i - 1) * 3 + 1] = i;
@@ -76,6 +89,8 @@ int main(int argc, char* argv[]) {
 		20.0f,
 	};
 
+	debbie.velocity = Vector2f(1000, 1000);
+
 	bodies.push_back(debbie);
 	bodies.push_back(debrah);
 
@@ -99,13 +114,17 @@ int main(int argc, char* argv[]) {
 			if (e.type == SDL_EVENT_QUIT) close = true;
 		}
 
+		// Update the bodies.
+		for (Body body : bodies) body.update(bodies);
+
+		// Move the bodies.
+		for (Body body : bodies) body.move(deltaTime);
+
 		// Render stuff.
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
 
-		for (Body body : bodies) {
-			body.render(renderer);
-		}
+		for (Body body : bodies) body.render(renderer);
 
 		SDL_RenderPresent(renderer);
 	}
