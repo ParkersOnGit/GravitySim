@@ -5,8 +5,6 @@
 
 struct Vector2f { 
 	float x, y; 
-	Vector2f operator+=(const Vector2f &vector) { return Vector2f(this->x + vector.x, this->y + vector.y); }
-	Vector2f operator*(const float value) { return Vector2f(this->x * value, this->y * value); }
 };
 
 struct Body {
@@ -16,14 +14,15 @@ struct Body {
 
 	Vector2f velocity;
 
-	void update(std::vector<Body> bodies) {
-		for (Body &body : bodies) {
-			if (&body == this) continue;
+	void update(const std::vector<Body*> &bodies) {
+		for (Body* body : bodies) {
+			
 		}
 	}
 
 	void move(float deltaTime) {
-		position += velocity * deltaTime;
+		position.x += velocity.x * deltaTime;
+		position.y += velocity.y * deltaTime;
 	}
 	
 	void render(SDL_Renderer* renderer) {
@@ -75,7 +74,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Create a vector of all bodies.
-	std::vector<Body> bodies;
+	std::vector<Body*> bodies;
 
 	// Create debug objects.
 	Body debbie = {
@@ -86,13 +85,13 @@ int main(int argc, char* argv[]) {
 	Body debrah = {
 		{ 800, 350 },
 		50.0f,
-		20.0f,
+		200.0f,
 	};
 
-	debbie.velocity = Vector2f(1000, 1000);
+	debbie.velocity = Vector2f(100, 100);
 
-	bodies.push_back(debbie);
-	bodies.push_back(debrah);
+	bodies.push_back(&debbie);
+	bodies.push_back(&debrah);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -115,16 +114,16 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Update the bodies.
-		for (Body body : bodies) body.update(bodies);
+		for (Body* body : bodies) body->update(bodies);
 
 		// Move the bodies.
-		for (Body body : bodies) body.move(deltaTime);
+		for (Body* body : bodies) body->move(deltaTime);
 
 		// Render stuff.
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
 
-		for (Body body : bodies) body.render(renderer);
+		for (Body* body : bodies) body->render(renderer);
 
 		SDL_RenderPresent(renderer);
 	}
