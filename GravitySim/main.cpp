@@ -8,16 +8,24 @@ struct Vector2f {
 };
 
 struct Body {
-	Vector2f position;
-	float mass;
-	float radius;
-
-	Vector2f velocity;
+	Vector2f position; // Meters
+	float mass; // Kilograms
+	float radius; // Meters
+	Vector2f velocity; // Meters
 
 	void update(const std::vector<Body*> &bodies) {
+		
 		for (Body* body : bodies) {
-			
+			if (body == this) continue;
+
+			// Using distance formula get distance squared.
+			float deltaX = body->position.x - this->position.x;
+			float deltaY = body->position.y - this->position.y;
+			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+			std::cout << distanceSquared << "\n";
 		}
+		std::cout << "\n\n";
 	}
 
 	void move(float deltaTime) {
@@ -84,7 +92,7 @@ int main(int argc, char* argv[]) {
 	};
 	Body debrah = {
 		{ 800, 350 },
-		50.0f,
+		250.0f,
 		200.0f,
 	};
 
