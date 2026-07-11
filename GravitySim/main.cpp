@@ -23,7 +23,10 @@ struct Body {
 			float deltaY = body->position.y - this->position.y;
 			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-			std::cout << distanceSquared << "\n";
+			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
+			float gravitationalForce = body->mass * this->mass / distanceSquared; // Newtons
+
+			std::cout << gravitationalForce << "\n";
 		}
 		std::cout << "\n\n";
 	}
