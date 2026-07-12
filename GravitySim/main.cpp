@@ -93,7 +93,7 @@ struct Body {
 
 		float t = SDL_clamp(log10(mass + 1.0f) / 5.0f, 0.0f, 1.0f);
 		
-		for (int i = 0; i < massColors.size() - 1; i++) {
+		for (int i = 0; i < colorPosition.size() - 1; i++) {
 			// If is inbetween.
 			if (t >= colorPosition[i] && t < colorPosition[i + 1]) {
 				// Normalize the t value for the linear interpolation.
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
 	};
 	Body debrah = {
 		{ 800, 350 },
-		25000.0f,
+		0.5f,
 		120.0f,
 	};
 
@@ -213,6 +213,9 @@ int main(int argc, char* argv[]) {
 		// Get width and height of screen.
 		SDL_GetWindowSize(window, &w, &h);
 		
+		// Debug remove later body getting more and more massive.
+		bodies[75].mass *= 1.0f * deltaTime + 1;
+
 		// Calculate deltaTime.
 		currentTime = SDL_GetPerformanceCounter();
 		deltaTime = (float)(currentTime - prevTime) / (float)SDL_GetPerformanceFrequency();
