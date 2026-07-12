@@ -1,5 +1,5 @@
 #include <vector>
-#include <iostream>
+#include <string>
 
 #include <SDL3/SDL.h>
 
@@ -19,7 +19,7 @@ struct Body {
 	Vector2f velocity; // Meters
 
 	void update(const std::vector<Body> &bodies, float deltaTime) {
-		for (Body body : bodies) {
+		for (const Body &body : bodies) {
 			if (&body == this) continue;
 
 			// Using distance formula get distance squared.
@@ -56,7 +56,7 @@ struct Body {
 		const int resolution = 16;
 
 		SDL_Vertex vertices[resolution + 1];
-		vertices[0].position = SDL_FPoint{position.x + camera.position.x, position.y + camera.position.y};
+		vertices[0].position = SDL_FPoint{position.x - camera.position.x, position.y + camera.position.y};
 		vertices[0].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 		int indices[resolution * 3];
@@ -64,7 +64,7 @@ struct Body {
 		for (int i = 1; i <= resolution; i++) {
 			float angle = i * 2.0f * 3.14159f / resolution;
 
-			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius + camera.position.x, position.y + (float)sin(angle) * radius + camera.position.y };
+			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius - camera.position.x, position.y + (float)sin(angle) * radius + camera.position.y };
 			vertices[i].color = SDL_FColor{ 0.85f, 0.85f, 0.85f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
@@ -76,7 +76,7 @@ struct Body {
 
 		// Draw velocity vector.
 		SDL_SetRenderDrawColor(renderer, 255, 55, 35, 255);
-		SDL_RenderLine(renderer, position.x + camera.position.x, position.y + camera.position.y, position.x + velocity.x + camera.position.x, position.y + velocity.y + camera.position.y);
+		SDL_RenderLine(renderer, position.x - camera.position.x, position.y + camera.position.y, position.x + velocity.x - camera.position.x, position.y + velocity.y + camera.position.y);
 	}
 };
 
@@ -159,13 +159,13 @@ int main(int argc, char* argv[]) {
 					camera.position.y += 2.5f;
 				}
 				if (e.key.key == SDLK_A) {
-					camera.position.x += 2.5f;
+					camera.position.x -= 2.5f;
 				}
 				if (e.key.key == SDLK_S) {
 					camera.position.y -= 2.5f;
 				}
 				if (e.key.key == SDLK_D) {
-					camera.position.x -= 2.5f;
+					camera.position.x += 2.5f;
 				}
 			}
 		}
@@ -184,6 +184,21 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(renderer);
 
 		for (Body &body : bodies) body.render(renderer, camera);
+
+		// Debug text.
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 155);
+		SDL_FRect debugTextBackground = SDL_FRect(0, 0, 275, 100);
+		SDL_RenderFillRect(renderer, &debugTextBackground);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderDebugText(renderer, 10.0f, 10.0f, "Camera:");
+		SDL_RenderDebugText(renderer, 20.0f, 20.0f, ("Pos: (" + std::to_string(camera.position.x) + ", " + std::to_string(camera.position.y) + ")").c_str());
+
+		SDL_RenderDebugText(renderer, 10.0f, 40.0f, "Simulation:");
+		SDL_RenderDebugText(renderer, 20.0f, 50.0f, ("Body Count:" + std::to_string(bodies.size())).c_str());
+		SDL_RenderDebugText(renderer, 20.0f, 60.0f, ("DeltaTime:" + std::to_string(deltaTime)).c_str());
+
 
 		SDL_RenderPresent(renderer);
 	}
