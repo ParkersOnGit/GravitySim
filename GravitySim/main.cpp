@@ -32,7 +32,7 @@ struct Body {
 			if (distance < 0.1f) continue;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = (body.mass * mass / (distance * distance)) * 10.0f; // Newtons
+			float gravitationalForce = (body.mass * mass / (distance * distance)) * 150.0f; // Newtons
 
 			// Normalize vector towards object.
 			float directionX = deltaX / distance;
@@ -49,8 +49,8 @@ struct Body {
 		position.y += velocity.y * deltaTime;
 	}
 
-	void collisionCheck(const std::vector<Body> &bodies) {
-		for (const Body& body : bodies) {
+	void collisionCheck(std::vector<Body> &bodies) {
+		for (Body& body : bodies) {
 			if (&body == this) continue;
 
 			// Using distance formula get distance.
@@ -59,6 +59,9 @@ struct Body {
 			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 			if (distance < radius + body.radius) {
+				// Divide by zero check.
+				if (distance < 0.001f) distance = 0.01f;
+
 				// Calculate the normal vector.
 				float normalDeltaX = deltaX / distance;
 				float normalDeltaY = deltaY / distance;
@@ -69,6 +72,26 @@ struct Body {
 				// Now move the circles out of eachother.
 				position.x += -normalDeltaX * depth / mass;
 				position.y += -normalDeltaY * depth / mass;
+
+				// Get the relative velocity.
+				float relativeVelocityX = body.velocity.x - velocity.x;
+				float relativeVelocityY = body.velocity.y - velocity.y;
+
+				// Velocity along the normal using dot product.
+				float velocityNormal = relativeVelocityX * normalDeltaX + relativeVelocityY * normalDeltaY;
+
+				// If objects moving away, continue.
+				if (velocityNormal > 0) continue;
+
+				float bounciness = 0.7f;
+				float push = (1.0f + bounciness) * -velocityNormal / (1 / mass + 1 / body.mass);
+
+				// Now change the velocities.
+				velocity.x -= push * normalDeltaX / mass;
+				velocity.y -= push * normalDeltaY / mass;
+
+				body.velocity.x += push * normalDeltaX / body.mass;
+				body.velocity.y += push * normalDeltaY / body.mass;
 			}
 		}
 	}
@@ -95,7 +118,7 @@ struct Body {
 		
 		for (int i = 0; i < colorPosition.size() - 1; i++) {
 			// If is inbetween.
-			if (t >= colorPosition[i] && t < colorPosition[i + 1]) {
+			if (t >= colorPosition[i] && t <= colorPosition[i + 1]) {
 				// Normalize the t value for the linear interpolation.
 				float normalizedT = (t - colorPosition[i]) / (colorPosition[i + 1] - colorPosition[i]);
 				
@@ -189,7 +212,7 @@ int main(int argc, char* argv[]) {
 	};
 	Body debrah = {
 		{ 800, 350 },
-		0.5f,
+		2500.0f,
 		120.0f,
 	};
 
@@ -212,14 +235,14 @@ int main(int argc, char* argv[]) {
 	while (!close) {
 		// Get width and height of screen.
 		SDL_GetWindowSize(window, &w, &h);
-		
-		// Debug remove later body getting more and more massive.
-		bodies[75].mass *= 1.0f * deltaTime + 1;
 
 		// Calculate deltaTime.
 		currentTime = SDL_GetPerformanceCounter();
 		deltaTime = (float)(currentTime - prevTime) / (float)SDL_GetPerformanceFrequency();
 		prevTime = currentTime;
+
+		// Prevent deltaTime from being too large.
+		if (deltaTime > 0.01f) deltaTime = 0.001f;
 
 		// Get events.
 		while (SDL_PollEvent(&e)) {
