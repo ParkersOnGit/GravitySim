@@ -67,8 +67,8 @@ struct Body {
 				float depth = (radius + body.radius) - distance;
 
 				// Now move the circles out of eachother.
-				position.x += -normalDeltaX * depth / 2 / mass;
-				position.y += normalDeltaY * depth / 2 / mass;
+				position.x += -normalDeltaX * depth / mass;
+				position.y += -normalDeltaY * depth / mass;
 			}
 		}
 	}
