@@ -75,10 +75,26 @@ struct Body {
 	
 	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
+		SDL_FColor massColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		// Tiny bodies
+		if (mass < 1)
+			massColor = { 0.255f, 0.341f, 0.910f, 1.0f };
+		// Normal bodies
+		else if (mass < 10)
+			massColor = { 0.596f, 0.871f, 0.322f, 1.0f };
+		// Large bodies
+		else if (mass < 500)
+			massColor = { 0.941f, 0.918f, 0.263f, 1.0f };
+		// Super large bodies
+		else if (mass < 10000)
+			massColor = { 0.941f, 0.682f, 0.263f, 1.0f };
+		// Massive bodies
+		else
+			massColor = { 0.878f, 0.157f, 0.157f, 1.0f };
 
 		SDL_Vertex vertices[resolution + 1];
 		vertices[0].position = SDL_FPoint{position.x - camera.position.x, position.y + camera.position.y};
-		vertices[0].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+		vertices[0].color = massColor;
 
 		int indices[resolution * 3];
 
@@ -86,7 +102,7 @@ struct Body {
 			float angle = i * 2.0f * 3.14159f / resolution;
 
 			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius - camera.position.x, position.y + (float)sin(angle) * radius + camera.position.y };
-			vertices[i].color = SDL_FColor{ 0.85f, 0.85f, 0.85f, 1.0f };
+			vertices[i].color = SDL_FColor{ massColor.r * 0.85f, massColor.g * 0.85f, massColor.b * 0.85f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
 			indices[(i - 1) * 3 + 1] = i;
@@ -138,8 +154,8 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < 50; i++) {
 		Body newBody = {
 			{ SDL_rand(500), SDL_rand(500)},
-			SDL_rand(50) + 25,
-			SDL_rand(50) + 10
+			SDL_rand(500) + 1,
+			SDL_rand(25) + 5
 		};
 		bodies.push_back(newBody);
 	}
