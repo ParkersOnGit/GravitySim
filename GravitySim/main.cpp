@@ -56,7 +56,7 @@ struct Body {
 		const int resolution = 16;
 
 		SDL_Vertex vertices[resolution + 1];
-		vertices[0].position = SDL_FPoint{position.x, position.y};
+		vertices[0].position = SDL_FPoint{position.x + camera.position.x, position.y + camera.position.y};
 		vertices[0].color = SDL_FColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 		int indices[resolution * 3];
@@ -76,7 +76,7 @@ struct Body {
 
 		// Draw velocity vector.
 		SDL_SetRenderDrawColor(renderer, 255, 55, 35, 255);
-		SDL_RenderLine(renderer, position.x, position.y, position.x + velocity.x, position.y + velocity.y);
+		SDL_RenderLine(renderer, position.x + camera.position.x, position.y + camera.position.y, position.x + velocity.x + camera.position.x, position.y + velocity.y + camera.position.y);
 	}
 };
 
