@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	for (int i = 0; i < 75; i++) {
+	for (int i = 0; i < 175; i++) {
 		Body newBody = {
 			{ SDL_rand(w), SDL_rand(h)},
 			SDL_rand(5000) / 40.0f + 1,
@@ -205,21 +205,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Create debug objects.
-	Body debbie = {
-		{ 500, 550 },
-		5.0f,
-		10.0f,
-	};
 	Body debrah = {
 		{ 800, 350 },
-		2500.0f,
-		120.0f,
+		250000.0f,
+		12.0f,
 	};
-
-	debbie.velocity = Vector2f(30, 5);
 	bodies.push_back(debrah);
-
-	bodies.push_back(debbie);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
