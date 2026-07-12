@@ -13,20 +13,20 @@ struct Body {
 	float radius; // Meters
 	Vector2f velocity; // Meters
 
-	void update(const std::vector<Body*> &bodies, float deltaTime) {
-		for (Body* body : bodies) {
-			if (body == this) continue;
+	void update(const std::vector<Body> &bodies, float deltaTime) {
+		for (Body body : bodies) {
+			if (&body == this) continue;
 
 			// Using distance formula get distance squared.
-			float deltaX = body->position.x - position.x;
-			float deltaY = body->position.y - position.y;
+			float deltaX = body.position.x - position.x;
+			float deltaY = body.position.y - position.y;
 			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 			// Make sure distances isn't 0.
 			if (distance < 0.1f) continue;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = (body->mass * mass / (distance * distance)) * 10.0f; // Newtons
+			float gravitationalForce = (body.mass * mass / (distance * distance)) * 10.0f; // Newtons
 
 			// Normalize vector towards object.
 			float directionX = deltaX / distance;
@@ -41,6 +41,10 @@ struct Body {
 	void move(float deltaTime) {
 		position.x += velocity.x * deltaTime;
 		position.y += velocity.y * deltaTime;
+	}
+
+	void collisionCheck() {
+
 	}
 	
 	void render(SDL_Renderer* renderer) {
@@ -96,16 +100,16 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Create a vector of all bodies.
-	std::vector<Body*> bodies;
+	std::vector<Body> bodies;
 
-	/*for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < 50; i++) {
 		Body newBody = {
 			{ SDL_rand(500), SDL_rand(500)},
 			SDL_rand(50) + 25,
-			SDL_rand(50) + 1
+			SDL_rand(50) + 10
 		};
-		bodies.push_back(&newBody);
-	}*/
+		bodies.push_back(newBody);
+	}
 
 	// Create debug objects.
 	Body debbie = {
@@ -120,9 +124,9 @@ int main(int argc, char* argv[]) {
 	};
 
 	debbie.velocity = Vector2f(10, 0);
-	bodies.push_back(&debrah);
+	bodies.push_back(debrah);
 
-	bodies.push_back(&debbie);
+	bodies.push_back(debbie);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -145,16 +149,19 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Update the bodies.
-		for (Body* body : bodies) body->update(bodies, deltaTime);
+		for (Body &body : bodies) body.update(bodies, deltaTime);
 
 		// Move the bodies.
-		for (Body* body : bodies) body->move(deltaTime);
+		for (Body &body : bodies) body.move(deltaTime);
+
+		// Check collisions.
+		for (Body &body : bodies) body.collisionCheck();
 
 		// Render stuff.
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
 
-		for (Body* body : bodies) body->render(renderer);
+		for (Body &body : bodies) body.render(renderer);
 
 		SDL_RenderPresent(renderer);
 	}
