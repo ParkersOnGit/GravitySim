@@ -26,8 +26,8 @@ struct Body {
 			float gravitationalForce = (body->mass * mass / distanceSquared) / 10000.0f; // Newtons
 
 			// Get the delta position to point towards the object.
-			velocity.x += deltaX * gravitationalForce;
-			velocity.y += deltaY * gravitationalForce;
+			velocity.x += deltaX * gravitationalForce / mass;
+			velocity.y += deltaY * gravitationalForce / mass;
 		}
 	}
 
@@ -91,6 +91,15 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body*> bodies;
 
+	/*for (int i = 0; i < 50; i++) {
+		Body newBody = {
+			{ SDL_rand(500), SDL_rand(500)},
+			SDL_rand(5) + 1,
+			SDL_rand(5) + 1
+		};
+		bodies.push_back(&newBody);
+	}*/
+
 	// Create debug objects.
 	Body debbie = {
 		{ 500, 450 },
@@ -99,7 +108,7 @@ int main(int argc, char* argv[]) {
 	};
 	Body debrah = {
 		{ 800, 350 },
-		250.0f,
+		2500.0f,
 		200.0f,
 	};
 
