@@ -100,9 +100,9 @@ struct Body {
 				float normalizedT = (t - colorPosition[i]) / (colorPosition[i + 1] - colorPosition[i]);
 				
 				// Now lerp the color.
-				massColor.r = massColors[colorPosition[i]].r + (massColors[colorPosition[i + 1]].r - massColors[colorPosition[i]].r) * normalizedT;
-				massColor.g = massColors[colorPosition[i]].g + (massColors[colorPosition[i + 1]].g - massColors[colorPosition[i]].g) * normalizedT;
-				massColor.b = massColors[colorPosition[i]].b + (massColors[colorPosition[i + 1]].b - massColors[colorPosition[i]].b) * normalizedT;
+				massColor.r = massColors[i].r + (massColors[i + 1].r - massColors[i].r) * normalizedT;
+				massColor.g = massColors[i].g + (massColors[i + 1].g - massColors[i].g) * normalizedT;
+				massColor.b = massColors[i].b + (massColors[i + 1].b - massColors[i].b) * normalizedT;
 
 				break;
 			}
