@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 			SDL_rand(50) + 25,
 			SDL_rand(50) + 10
 		};
-		//bodies.push_back(newBody);
+		bodies.push_back(newBody);
 	}
 
 	// Create debug objects.
