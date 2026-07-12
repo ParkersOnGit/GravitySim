@@ -13,7 +13,7 @@ struct Body {
 	float radius; // Meters
 	Vector2f velocity; // Meters
 
-	void update(const std::vector<Body*> &bodies) {
+	void update(const std::vector<Body*> &bodies, float deltaTime) {
 		for (Body* body : bodies) {
 			if (body == this) continue;
 
@@ -23,11 +23,15 @@ struct Body {
 			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = (body->mass * mass / distanceSquared) / 10000.0f; // Newtons
+			float gravitationalForce = (body->mass * mass / distanceSquared) / 100.0f; // Newtons
+
+			// Normalize vector towards object.
+			float directionX = deltaX / sqrt(distanceSquared);
+			float directionY = deltaY / sqrt(distanceSquared);
 
 			// Get the delta position to point towards the object.
-			velocity.x += deltaX * gravitationalForce / mass;
-			velocity.y += deltaY * gravitationalForce / mass;
+			velocity.x += directionX * gravitationalForce / mass * deltaTime;
+			velocity.y += directionY * gravitationalForce / mass * deltaTime;
 		}
 	}
 
@@ -94,25 +98,25 @@ int main(int argc, char* argv[]) {
 	/*for (int i = 0; i < 50; i++) {
 		Body newBody = {
 			{ SDL_rand(500), SDL_rand(500)},
-			SDL_rand(5) + 1,
-			SDL_rand(5) + 1
+			SDL_rand(50) + 25,
+			SDL_rand(50) + 1
 		};
 		bodies.push_back(&newBody);
 	}*/
 
 	// Create debug objects.
 	Body debbie = {
-		{ 500, 450 },
+		{ 500, 550 },
 		5.0f,
 		10.0f,
 	};
 	Body debrah = {
 		{ 800, 350 },
-		2500.0f,
-		200.0f,
+		25000.0f,
+		120.0f,
 	};
 
-	debbie.velocity = Vector2f(10, 10);
+	debbie.velocity = Vector2f(10, 0);
 	bodies.push_back(&debrah);
 
 	bodies.push_back(&debbie);
@@ -138,7 +142,7 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Update the bodies.
-		for (Body* body : bodies) body->update(bodies);
+		for (Body* body : bodies) body->update(bodies, deltaTime);
 
 		// Move the bodies.
 		for (Body* body : bodies) body->move(deltaTime);
