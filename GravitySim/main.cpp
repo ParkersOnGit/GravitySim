@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
 	float deltaTime = 0.0f;
 
 	bool close = false;
+	bool runSimulation = true;
 	SDL_Event e;
 
 	// Main loop.
@@ -167,17 +168,22 @@ int main(int argc, char* argv[]) {
 				if (e.key.key == SDLK_D) {
 					camera.position.x += 2.5f;
 				}
+				if (e.key.key == SDLK_SPACE) {
+					runSimulation = !runSimulation;
+				}
 			}
 		}
 
-		// Update the bodies.
-		for (Body &body : bodies) body.update(bodies, deltaTime);
+		if (runSimulation) {
+			// Update the bodies.
+			for (Body& body : bodies) body.update(bodies, deltaTime);
 
-		// Move the bodies.
-		for (Body &body : bodies) body.move(deltaTime);
+			// Move the bodies.
+			for (Body& body : bodies) body.move(deltaTime);
 
-		// Check collisions.
-		for (Body &body : bodies) body.collisionCheck();
+			// Check collisions.
+			for (Body& body : bodies) body.collisionCheck();
+		}
 
 		// Render stuff.
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
@@ -194,10 +200,11 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderDebugText(renderer, 10.0f, 10.0f, "Camera:");
 		SDL_RenderDebugText(renderer, 20.0f, 20.0f, ("Pos: (" + std::to_string(camera.position.x) + ", " + std::to_string(camera.position.y) + ")").c_str());
+		SDL_RenderDebugText(renderer, 20.0f, 30.0f, ("Zoom: " + std::to_string(camera.zoom)).c_str());
 
-		SDL_RenderDebugText(renderer, 10.0f, 40.0f, "Simulation:");
-		SDL_RenderDebugText(renderer, 20.0f, 50.0f, ("Body Count:" + std::to_string(bodies.size())).c_str());
-		SDL_RenderDebugText(renderer, 20.0f, 60.0f, ("DeltaTime:" + std::to_string(deltaTime)).c_str());
+		SDL_RenderDebugText(renderer, 10.0f, 50.0f, "Simulation:");
+		SDL_RenderDebugText(renderer, 20.0f, 60.0f, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str());
+		SDL_RenderDebugText(renderer, 20.0f, 70.0f, ("Body Count: " + std::to_string(bodies.size())).c_str());
 
 
 		SDL_RenderPresent(renderer);
