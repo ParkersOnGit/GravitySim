@@ -23,7 +23,7 @@ struct Body {
 			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = (body->mass * mass / distanceSquared) / 100.0f; // Newtons
+			float gravitationalForce = (body->mass * mass / distanceSquared) * 100.0f; // Newtons
 
 			// Normalize vector towards object.
 			float directionX = deltaX / sqrt(distanceSquared);
