@@ -73,24 +73,40 @@ struct Body {
 		}
 	}
 	
+	
+
 	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
 		SDL_FColor massColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-		// Tiny bodies
-		if (mass < 1)
-			massColor = { 0.255f, 0.341f, 0.910f, 1.0f };
-		// Normal bodies
-		else if (mass < 10)
-			massColor = { 0.596f, 0.871f, 0.322f, 1.0f };
-		// Large bodies
-		else if (mass < 500)
-			massColor = { 0.941f, 0.918f, 0.263f, 1.0f };
-		// Super large bodies
-		else if (mass < 10000)
-			massColor = { 0.941f, 0.682f, 0.263f, 1.0f };
-		// Massive bodies
-		else
-			massColor = { 0.878f, 0.157f, 0.157f, 1.0f };
+
+		std::vector<float> colorPosition = {
+			0.0f, 0.25f, 0.5f, 0.75f, 1.0f
+		};
+
+		std::vector<SDL_FColor> massColors = {
+			{0.255f, 0.341f, 0.910f, 1.0f}, // Blue
+			{0.596f, 0.871f, 0.322f, 1.0f}, // Green
+			{0.941f, 0.918f, 0.263f, 1.0f}, // Yellow
+			{0.941f, 0.682f, 0.263f, 1.0f}, // Orange
+			{0.878f, 0.157f, 0.157f, 1.0f}  // Red
+		};
+
+		float t = SDL_clamp(log10(mass + 1.0f) / 5.0f, 0.0f, 1.0f);
+		
+		for (int i = 0; i < massColors.size() - 1; i++) {
+			// If is inbetween.
+			if (t >= colorPosition[i] && t < colorPosition[i + 1]) {
+				// Normalize the t value for the linear interpolation.
+				float normalizedT = (t - colorPosition[i]) / (colorPosition[i + 1] - colorPosition[i]);
+				
+				// Now lerp the color.
+				massColor.r = massColors[colorPosition[i]].r + (massColors[colorPosition[i + 1]].r - massColors[colorPosition[i]].r) * normalizedT;
+				massColor.g = massColors[colorPosition[i]].g + (massColors[colorPosition[i + 1]].g - massColors[colorPosition[i]].g) * normalizedT;
+				massColor.b = massColors[colorPosition[i]].b + (massColors[colorPosition[i + 1]].b - massColors[colorPosition[i]].b) * normalizedT;
+
+				break;
+			}
+		}
 
 		SDL_Vertex vertices[resolution + 1];
 		vertices[0].position = SDL_FPoint{position.x - camera.position.x, position.y + camera.position.y};
@@ -141,6 +157,10 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	// Get width and height of screen.
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
+
 	// Create camera.
 	Camera camera;
 
@@ -151,11 +171,12 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < 75; i++) {
 		Body newBody = {
-			{ SDL_rand(500), SDL_rand(500)},
-			SDL_rand(500) + 1,
-			SDL_rand(25) + 5
+			{ SDL_rand(w), SDL_rand(h)},
+			SDL_rand(5000) / 40.0f + 1,
+			SDL_rand(25) + 5,
+			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
 		};
 		bodies.push_back(newBody);
 	}
@@ -189,8 +210,7 @@ int main(int argc, char* argv[]) {
 
 	// Main loop.
 	while (!close) {
-		// Get width and height of screen:
-		int w, h;
+		// Get width and height of screen.
 		SDL_GetWindowSize(window, &w, &h);
 		
 		// Calculate deltaTime.
