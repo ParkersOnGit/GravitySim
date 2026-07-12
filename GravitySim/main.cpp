@@ -107,6 +107,10 @@ int main(int argc, char* argv[]) {
 	// Create camera.
 	Camera camera;
 
+	// Creation mode body.
+	Body creationBody;
+	int creationSelection = 0;
+
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
@@ -116,7 +120,7 @@ int main(int argc, char* argv[]) {
 			SDL_rand(50) + 25,
 			SDL_rand(50) + 10
 		};
-		bodies.push_back(newBody);
+		//bodies.push_back(newBody);
 	}
 
 	// Create debug objects.
@@ -132,9 +136,9 @@ int main(int argc, char* argv[]) {
 	};
 
 	debbie.velocity = Vector2f(10, 0);
-	bodies.push_back(debrah);
+	/*bodies.push_back(debrah);
 
-	bodies.push_back(debbie);
+	bodies.push_back(debbie);*/
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -143,10 +147,15 @@ int main(int argc, char* argv[]) {
 
 	bool close = false;
 	bool runSimulation = true;
+	bool createMode = false;
 	SDL_Event e;
 
 	// Main loop.
 	while (!close) {
+		// Get width and height of screen:
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
+		
 		// Calculate deltaTime.
 		currentTime = SDL_GetPerformanceCounter();
 		deltaTime = (float)(currentTime - prevTime) / (float)SDL_GetPerformanceFrequency();
@@ -157,24 +166,44 @@ int main(int argc, char* argv[]) {
 			if (e.type == SDL_EVENT_QUIT) close = true;
 			if (e.type == SDL_EVENT_KEY_DOWN) {
 				if (e.key.key == SDLK_W) {
-					camera.position.y += 2.5f;
+					if (!createMode) camera.position.y += 2.5f;
+					else if (creationSelection > 0) creationSelection--;
 				}
 				if (e.key.key == SDLK_A) {
-					camera.position.x -= 2.5f;
+					if (!createMode) camera.position.x -= 2.5f;
+					else {
+
+					}
 				}
 				if (e.key.key == SDLK_S) {
-					camera.position.y -= 2.5f;
+					if (!createMode) camera.position.y -= 2.5f;
+					else if (creationSelection < 3) creationSelection++;
 				}
 				if (e.key.key == SDLK_D) {
-					camera.position.x += 2.5f;
+					if (!createMode) camera.position.x += 2.5f;
+					else {
+
+					}
+				}
+				if (e.key.key == SDLK_ESCAPE) {
+					close = true;
 				}
 				if (e.key.key == SDLK_SPACE) {
 					runSimulation = !runSimulation;
 				}
+				if (e.key.key == SDLK_C) {
+					creationBody = Body{
+						{ camera.position.x + w / 2.0f, -camera.position.y + h / 2.0f},
+						1.0f,
+						16.0f,
+						{ 0.0f, 0.0f }
+					};
+					createMode = !createMode;
+				}
 			}
 		}
 
-		if (runSimulation) {
+		if (runSimulation && !createMode) {
 			// Update the bodies.
 			for (Body& body : bodies) body.update(bodies, deltaTime);
 
@@ -206,6 +235,24 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDebugText(renderer, 20.0f, 60.0f, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str());
 		SDL_RenderDebugText(renderer, 20.0f, 70.0f, ("Body Count: " + std::to_string(bodies.size())).c_str());
 
+		// Create mode text.
+		if (createMode) {
+			float xOffset = -100;
+			float yOffset = -100;
+
+			creationBody.render(renderer, camera);
+
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset, "Creation Mode");
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 20, ("Position: (" + std::to_string(creationBody.position.x) + ", " + std::to_string(creationBody.position.y) + ")").c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 30, ("Mass: " + std::to_string(creationBody.mass)).c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 40, ("Radius: " + std::to_string(creationBody.radius)).c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 50, ("Velocity: (" + std::to_string(creationBody.velocity.x) + ", " + std::to_string(creationBody.velocity.y) + ")").c_str());
+
+			// Selection cursor.
+			SDL_FRect debugTextBackground = SDL_FRect(w / 2.0f + xOffset - 10, h / 2.0f + yOffset + 18 + creationSelection * 10, 5, 10);
+			SDL_RenderFillRect(renderer, &debugTextBackground);
+		}
 
 		SDL_RenderPresent(renderer);
 	}
