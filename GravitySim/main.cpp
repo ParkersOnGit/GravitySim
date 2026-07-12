@@ -20,14 +20,17 @@ struct Body {
 			// Using distance formula get distance squared.
 			float deltaX = body->position.x - position.x;
 			float deltaY = body->position.y - position.y;
-			float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+
+			// Make sure distances isn't 0.
+			if (distance < 0.1f) continue;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
-			float gravitationalForce = (body->mass * mass / distanceSquared) * 100.0f; // Newtons
+			float gravitationalForce = (body->mass * mass / (distance * distance)) * 10.0f; // Newtons
 
 			// Normalize vector towards object.
-			float directionX = deltaX / sqrt(distanceSquared);
-			float directionY = deltaY / sqrt(distanceSquared);
+			float directionX = deltaX / distance;
+			float directionY = deltaY / distance;
 
 			// Get the delta position to point towards the object.
 			velocity.x += directionX * gravitationalForce / mass * deltaTime;
