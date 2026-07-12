@@ -7,6 +7,11 @@ struct Vector2f {
 	float x, y; 
 };
 
+struct Camera {
+	Vector2f position = Vector2f(0.0f, 0.0f);
+	float zoom = 1.0f; // Not yet implemented. Do later!
+};
+
 struct Body {
 	Vector2f position; // Meters
 	float mass; // Kilograms
@@ -47,7 +52,7 @@ struct Body {
 
 	}
 	
-	void render(SDL_Renderer* renderer) {
+	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
 
 		SDL_Vertex vertices[resolution + 1];
@@ -59,7 +64,7 @@ struct Body {
 		for (int i = 1; i <= resolution; i++) {
 			float angle = i * 2.0f * 3.14159f / resolution;
 
-			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius, position.y + (float)sin(angle) * radius };
+			vertices[i].position = SDL_FPoint{ position.x + (float)cos(angle) * radius + camera.position.x, position.y + (float)sin(angle) * radius + camera.position.y };
 			vertices[i].color = SDL_FColor{ 0.85f, 0.85f, 0.85f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
@@ -98,6 +103,9 @@ int main(int argc, char* argv[]) {
 		SDL_Quit();
 		return 1;
 	}
+
+	// Create camera.
+	Camera camera;
 
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
@@ -146,6 +154,20 @@ int main(int argc, char* argv[]) {
 		// Get events.
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_EVENT_QUIT) close = true;
+			if (e.type == SDL_EVENT_KEY_DOWN) {
+				if (e.key.key == SDLK_W) {
+					camera.position.y += 2.5f;
+				}
+				if (e.key.key == SDLK_A) {
+					camera.position.x += 2.5f;
+				}
+				if (e.key.key == SDLK_S) {
+					camera.position.y -= 2.5f;
+				}
+				if (e.key.key == SDLK_D) {
+					camera.position.x -= 2.5f;
+				}
+			}
 		}
 
 		// Update the bodies.
@@ -161,7 +183,7 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 5, 5, 10, 255);
 		SDL_RenderClear(renderer);
 
-		for (Body &body : bodies) body.render(renderer);
+		for (Body &body : bodies) body.render(renderer, camera);
 
 		SDL_RenderPresent(renderer);
 	}
