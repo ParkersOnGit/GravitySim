@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include <SDL3/SDL.h>
 
@@ -22,7 +23,7 @@ struct Body {
 		for (const Body &body : bodies) {
 			if (&body == this) continue;
 
-			// Using distance formula get distance squared.
+			// Using distance formula get distance.
 			float deltaX = body.position.x - position.x;
 			float deltaY = body.position.y - position.y;
 			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -48,8 +49,28 @@ struct Body {
 		position.y += velocity.y * deltaTime;
 	}
 
-	void collisionCheck() {
+	void collisionCheck(const std::vector<Body> &bodies) {
+		for (const Body& body : bodies) {
+			if (&body == this) continue;
 
+			// Using distance formula get distance.
+			float deltaX = body.position.x - position.x;
+			float deltaY = body.position.y - position.y;
+			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+
+			if (distance < radius + body.radius) {
+				// Calculate the normal vector.
+				float normalDeltaX = deltaX / distance;
+				float normalDeltaY = deltaY / distance;
+
+				// Get the overlap ammount.
+				float depth = (radius + body.radius) - distance;
+
+				// Now move the circles out of eachother.
+				position.x += -normalDeltaX * depth / 2 / mass;
+				position.y += normalDeltaY * depth / 2 / mass;
+			}
+		}
 	}
 	
 	void render(SDL_Renderer* renderer, const Camera &camera) {
@@ -88,7 +109,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Create window.
-	SDL_Window* window = SDL_CreateWindow("2D Gravity Simulator", 1440, 900, NULL);
+	SDL_Window* window = SDL_CreateWindow("2D Gravity Simulator", 1440, 900, SDL_WINDOW_RESIZABLE);
 	if (!window) {
 		SDL_Log("Failed to create window: %s\n", SDL_GetError());
 		SDL_Quit();
@@ -135,10 +156,10 @@ int main(int argc, char* argv[]) {
 		120.0f,
 	};
 
-	debbie.velocity = Vector2f(10, 0);
-	/*bodies.push_back(debrah);
+	debbie.velocity = Vector2f(30, 5);
+	bodies.push_back(debrah);
 
-	bodies.push_back(debbie);*/
+	bodies.push_back(debbie);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
@@ -211,7 +232,7 @@ int main(int argc, char* argv[]) {
 			for (Body& body : bodies) body.move(deltaTime);
 
 			// Check collisions.
-			for (Body& body : bodies) body.collisionCheck();
+			for (Body& body : bodies) body.collisionCheck(bodies);
 		}
 
 		// Render stuff.
