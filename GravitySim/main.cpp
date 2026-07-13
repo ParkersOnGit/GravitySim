@@ -140,7 +140,7 @@ struct Body {
 		}
 
 		SDL_Vertex vertices[resolution + 1];
-		vertices[0].position = SDL_FPoint{(position.x - camera.position.x) * camera.zoom, (position.y + camera.position.y) * camera.zoom };
+		vertices[0].position = SDL_FPoint{(position.x - camera.position.x) * camera.zoom, (position.y - camera.position.y) * camera.zoom };
 		vertices[0].color = massColor;
 
 		int indices[resolution * 3];
@@ -148,7 +148,7 @@ struct Body {
 		for (int i = 1; i <= resolution; i++) {
 			float angle = i * 2.0f * 3.14159f / resolution;
 
-			vertices[i].position = SDL_FPoint{ (position.x + (float)cos(angle) * radius - camera.position.x) * camera.zoom, (position.y + (float)sin(angle) * radius + camera.position.y) * camera.zoom };
+			vertices[i].position = SDL_FPoint{ (position.x + (float)cos(angle) * radius - camera.position.x) * camera.zoom, (position.y + (float)sin(angle) * radius - camera.position.y) * camera.zoom };
 			vertices[i].color = SDL_FColor{ massColor.r * 0.85f, massColor.g * 0.85f, massColor.b * 0.85f, 1.0f };
 
 			indices[(i - 1) * 3 + 0] = 0;
@@ -161,9 +161,9 @@ struct Body {
 		// Draw velocity vector.
 		SDL_SetRenderDrawColor(renderer, 255, 55, 35, 255);
 		SDL_RenderLine(renderer, (position.x - camera.position.x) * camera.zoom, 
-			(position.y + camera.position.y) * camera.zoom, 
+			(position.y - camera.position.y) * camera.zoom, 
 			(position.x + velocity.x - camera.position.x) * camera.zoom, 
-			(position.y + velocity.y + camera.position.y) * camera.zoom);
+			(position.y + velocity.y - camera.position.y) * camera.zoom);
 	}
 };
 
@@ -251,7 +251,7 @@ int main(int argc, char* argv[]) {
 			if (e.type == SDL_EVENT_QUIT) running = false;
 			if (e.type == SDL_EVENT_KEY_DOWN) {
 				if (e.key.key == SDLK_W) {
-					if (!createMode) camera.position.y += 7.5f / camera.zoom;
+					if (!createMode) camera.position.y -= 7.5f / camera.zoom;
 					else if (creationSelection > 0) creationSelection--;
 				}
 				if (e.key.key == SDLK_A) {
@@ -261,7 +261,7 @@ int main(int argc, char* argv[]) {
 					}
 				}
 				if (e.key.key == SDLK_S) {
-					if (!createMode) camera.position.y -= 7.5f / camera.zoom;
+					if (!createMode) camera.position.y += 7.5f / camera.zoom;
 					else if (creationSelection < 3) creationSelection++;
 				}
 				if (e.key.key == SDLK_D) {
@@ -271,10 +271,14 @@ int main(int argc, char* argv[]) {
 					}
 				}
 				if (e.key.key == SDLK_E) {
+					Vector2f cameraCenter = Vector2f(w, h) / 2.0f / camera.zoom;
 					camera.zoom *= 1.1f;
+					camera.position += cameraCenter * (1.0f - 1.0f / 1.1f);
 				}
 				if (e.key.key == SDLK_Q && camera.zoom > 0.001f) {
+					Vector2f cameraCenter = Vector2f(w, h) / 2.0f / camera.zoom;
 					camera.zoom *= 0.9f;
+					camera.position += cameraCenter * (1.0f - 1.0f / 0.9f);
 				}
 				if (e.key.key == SDLK_ESCAPE) {
 					running = false;
