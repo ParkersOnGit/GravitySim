@@ -133,8 +133,7 @@ struct Body {
 				// Now lerp the color.
 				massColor.r = massColors[i].r + (massColors[i + 1].r - massColors[i].r) * normalizedT;
 				massColor.g = massColors[i].g + (massColors[i + 1].g - massColors[i].g) * normalizedT;
-				massColor.b = massColors[i].b + (massColors[i + 1].b - massColors[i].b) * normalizedT;
-
+				massColor.b = massColors[i].b + (massColors[i + 1].b - massColors[i].b) * normalizedT; 
 				break;
 			}
 		}
@@ -205,10 +204,12 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
+	Vector2f range = Vector2f(100000, 100000);
+
 	for (int i = 0; i < 220; i++) {
 		Body newBody = {
-			{ SDL_rand(w * 4) - w, SDL_rand(h * 4) - h},
-			SDL_rand(50000) / 40.0f + 1,
+			{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
+			SDL_rand(15000) / 40.0f + 1,
 			SDL_rand(25) + 5,
 			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
 		};
@@ -220,6 +221,7 @@ int main(int argc, char* argv[]) {
 	Uint64 currentTime = 0;
 	float deltaTime = 0.0f;
 
+	int timeStep = 1;
 	bool running = true;
 	bool runSimulation = true;
 	bool createMode = false;
@@ -287,18 +289,26 @@ int main(int argc, char* argv[]) {
 					};
 					createMode = !createMode;
 				}
+				if (e.key.key == SDLK_UP) {
+					timeStep++;
+				}
+				if (e.key.key == SDLK_DOWN && timeStep > 0) {
+					timeStep--;
+				}
 			}
 		}
 
 		if (runSimulation && !createMode) {
-			// Update the bodies.
-			for (Body& body : bodies) body.update(bodies, deltaTime);
+			for (int i = 0; i < timeStep; i++) {
+				// Update the bodies.
+				for (Body& body : bodies) body.update(bodies, deltaTime);
 
-			// Move the bodies.
-			for (Body& body : bodies) body.move(deltaTime);
+				// Move the bodies.
+				for (Body& body : bodies) body.move(deltaTime);
 
-			// Check collisions.
-			for (Body& body : bodies) body.collisionCheck(bodies);
+				// Check collisions.
+				for (Body& body : bodies) body.collisionCheck(bodies);
+			}
 		}
 
 		// Render stuff.
@@ -310,17 +320,20 @@ int main(int argc, char* argv[]) {
 		// Debug text.
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 155);
-		SDL_FRect debugTextBackground = SDL_FRect(0, 0, 275, 100);
+		SDL_FRect debugTextBackground = SDL_FRect(0, 0, 350, 100);
 		SDL_RenderFillRect(renderer, &debugTextBackground);
 
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderDebugText(renderer, 10.0f, 10.0f, "Camera:");
-		SDL_RenderDebugText(renderer, 20.0f, 20.0f, ("Pos: (" + std::to_string(camera.position.x) + ", " + std::to_string(camera.position.y) + ")").c_str());
-		SDL_RenderDebugText(renderer, 20.0f, 30.0f, ("Zoom: " + std::to_string(camera.zoom)).c_str());
+		int lineCount = 10;
 
-		SDL_RenderDebugText(renderer, 10.0f, 50.0f, "Simulation:");
-		SDL_RenderDebugText(renderer, 20.0f, 60.0f, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str());
-		SDL_RenderDebugText(renderer, 20.0f, 70.0f, ("Body Count: " + std::to_string(bodies.size())).c_str());
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Camera:"); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Pos: (" + std::to_string(camera.position.x) + ", " + std::to_string(camera.position.y) + ")").c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Zoom: " + std::to_string(camera.zoom)).c_str()); lineCount += 10;
+		lineCount += 10;
+		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Simulation:"); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x").c_str()); lineCount += 10;
 
 		// Create mode text.
 		if (createMode) {
