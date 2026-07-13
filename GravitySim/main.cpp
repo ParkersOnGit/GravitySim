@@ -6,6 +6,29 @@
 
 struct Vector2f { 
 	float x, y; 
+
+	Vector2f& operator+=(const Vector2f &vector) {
+		x += vector.x;
+		y += vector.y;
+		return *this;
+	}
+	Vector2f& operator-=(const Vector2f& vector) {
+		x -= vector.x;
+		y -= vector.y;
+		return *this;
+	}
+
+	Vector2f operator+(float value) { return Vector2f(x + value, y + value); }
+	Vector2f operator-(float value) { return Vector2f(x - value, y - value); }
+	Vector2f operator*(float value) { return Vector2f(x * value, y * value); }
+	Vector2f operator/(float value) { return Vector2f(x / value, y / value); }
+
+	Vector2f operator+(const Vector2f& vector) { return Vector2f(x + vector.x, y + vector.y); }
+	Vector2f operator-(const Vector2f& vector) { return Vector2f(x - vector.x, y - vector.y); }
+	Vector2f operator*(const Vector2f& vector) { return Vector2f(x * vector.x, y * vector.y); }
+	Vector2f operator/(const Vector2f& vector) { return Vector2f(x / vector.x, y / vector.y); }
+
+	float dot(const Vector2f& vector) { return (x * vector.x) + (y * vector.y); }
 };
 
 struct Camera {
@@ -24,9 +47,8 @@ struct Body {
 			if (&body == this) continue;
 
 			// Using distance formula get distance.
-			float deltaX = body.position.x - position.x;
-			float deltaY = body.position.y - position.y;
-			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+			Vector2f deltaPosition = Vector2f(body.position) - position;
+			float distance = sqrt(deltaPosition.dot(deltaPosition));
 
 			// Make sure distances isn't 0.
 			if (distance < 0.1f) continue;
@@ -35,50 +57,41 @@ struct Body {
 			float gravitationalForce = (body.mass * mass / (distance * distance)) * 150.0f; // Newtons
 
 			// Normalize vector towards object.
-			float directionX = deltaX / distance;
-			float directionY = deltaY / distance;
+			Vector2f direction = deltaPosition / distance;
 
 			// Get the delta position to point towards the object.
-			velocity.x += directionX * gravitationalForce / mass * deltaTime;
-			velocity.y += directionY * gravitationalForce / mass * deltaTime;
+			velocity += direction * gravitationalForce / mass * deltaTime;
 		}
 	}
 
-	void move(float deltaTime) {
-		position.x += velocity.x * deltaTime;
-		position.y += velocity.y * deltaTime;
-	}
+	void move(float deltaTime) { position += velocity * deltaTime; }
 
 	void collisionCheck(std::vector<Body> &bodies) {
 		for (Body& body : bodies) {
 			if (&body == this) continue;
 
 			// Using distance formula get distance.
-			float deltaX = body.position.x - position.x;
-			float deltaY = body.position.y - position.y;
-			float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+			Vector2f deltaPosition = Vector2f(body.position) - position;
+			float distance = sqrt(deltaPosition.dot(deltaPosition));
 
 			if (distance < radius + body.radius) {
 				// Divide by zero check.
 				if (distance < 0.001f) distance = 0.01f;
 
 				// Calculate the normal vector.
-				float normalDeltaX = deltaX / distance;
-				float normalDeltaY = deltaY / distance;
+				Vector2f normalDeltaPosition = deltaPosition / distance;
 
 				// Get the overlap ammount.
 				float depth = (radius + body.radius) - distance;
 
 				// Now move the circles out of eachother.
-				position.x += -normalDeltaX * depth / mass;
-				position.y += -normalDeltaY * depth / mass;
+				position -= normalDeltaPosition * depth / mass;
 
 				// Get the relative velocity.
-				float relativeVelocityX = body.velocity.x - velocity.x;
-				float relativeVelocityY = body.velocity.y - velocity.y;
+				Vector2f relativeVelocity = body.velocity - velocity;
 
 				// Velocity along the normal using dot product.
-				float velocityNormal = relativeVelocityX * normalDeltaX + relativeVelocityY * normalDeltaY;
+				float velocityNormal = relativeVelocity.dot(normalDeltaPosition);
 
 				// If objects moving away, continue.
 				if (velocityNormal > 0) continue;
@@ -87,16 +100,11 @@ struct Body {
 				float push = (1.0f + bounciness) * -velocityNormal / (1 / mass + 1 / body.mass);
 
 				// Now change the velocities.
-				velocity.x -= push * normalDeltaX / mass;
-				velocity.y -= push * normalDeltaY / mass;
-
-				body.velocity.x += push * normalDeltaX / body.mass;
-				body.velocity.y += push * normalDeltaY / body.mass;
+				velocity -= normalDeltaPosition * push / mass;
+				body.velocity += normalDeltaPosition * push / body.mass;
 			}
 		}
 	}
-	
-	
 
 	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
@@ -152,7 +160,10 @@ struct Body {
 
 		// Draw velocity vector.
 		SDL_SetRenderDrawColor(renderer, 255, 55, 35, 255);
-		SDL_RenderLine(renderer, (position.x - camera.position.x) * camera.zoom, (position.y + camera.position.y) * camera.zoom, (position.x + velocity.x - camera.position.x) * camera.zoom, (position.y + velocity.y + camera.position.y) * camera.zoom);
+		SDL_RenderLine(renderer, (position.x - camera.position.x) * camera.zoom, 
+			(position.y + camera.position.y) * camera.zoom, 
+			(position.x + velocity.x - camera.position.x) * camera.zoom, 
+			(position.y + velocity.y + camera.position.y) * camera.zoom);
 	}
 };
 
@@ -217,13 +228,13 @@ int main(int argc, char* argv[]) {
 	Uint64 currentTime = 0;
 	float deltaTime = 0.0f;
 
-	bool close = false;
+	bool running = true;
 	bool runSimulation = true;
 	bool createMode = false;
 	SDL_Event e;
 
 	// Main loop.
-	while (!close) {
+	while (running) {
 		// Get width and height of screen.
 		SDL_GetWindowSize(window, &w, &h);
 
@@ -237,7 +248,7 @@ int main(int argc, char* argv[]) {
 
 		// Get events.
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_EVENT_QUIT) close = true;
+			if (e.type == SDL_EVENT_QUIT) running = false;
 			if (e.type == SDL_EVENT_KEY_DOWN) {
 				if (e.key.key == SDLK_W) {
 					if (!createMode) camera.position.y += 7.5f / camera.zoom;
@@ -266,7 +277,7 @@ int main(int argc, char* argv[]) {
 					camera.zoom *= 0.9f;
 				}
 				if (e.key.key == SDLK_ESCAPE) {
-					close = true;
+					running = false;
 				}
 				if (e.key.key == SDLK_SPACE) {
 					runSimulation = !runSimulation;
