@@ -205,23 +205,15 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	for (int i = 0; i < 120; i++) {
+	for (int i = 0; i < 220; i++) {
 		Body newBody = {
-			{ SDL_rand(w), SDL_rand(h)},
-			SDL_rand(5000) / 40.0f + 1,
+			{ SDL_rand(w * 4) - w, SDL_rand(h * 4) - h},
+			SDL_rand(50000) / 40.0f + 1,
 			SDL_rand(25) + 5,
 			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
 		};
 		bodies.push_back(newBody);
 	}
-
-	// Create debug objects.
-	Body debrah = {
-		{ 800, 350 },
-		25000.0f,
-		120.0f,
-	};
-	//bodies.push_back(debrah);
 
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
