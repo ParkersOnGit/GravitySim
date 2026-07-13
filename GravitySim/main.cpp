@@ -204,9 +204,9 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	Vector2f range = Vector2f(100000, 100000);
+	Vector2f range = Vector2f(2500, 2500);
 
-	for (int i = 0; i < 220; i++) {
+	for (int i = 0; i < 500; i++) {
 		Body newBody = {
 			{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
 			SDL_rand(15000) / 40.0f + 1,
@@ -215,7 +215,13 @@ int main(int argc, char* argv[]) {
 		};
 		bodies.push_back(newBody);
 	}
-
+	Body newBody = {
+		{0, 0},
+			100000,
+			500,
+			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
+	};
+	//bodies.push_back(newBody);
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
 	Uint64 currentTime = 0;
@@ -238,7 +244,7 @@ int main(int argc, char* argv[]) {
 		prevTime = currentTime;
 
 		// Prevent deltaTime from being too large.
-		if (deltaTime > 0.01f) deltaTime = 0.001f;
+		if (deltaTime > 0.1f) deltaTime = 0.01f;
 
 		// Get events.
 		while (SDL_PollEvent(&e)) {
