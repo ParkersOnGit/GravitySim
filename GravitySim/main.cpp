@@ -66,15 +66,17 @@ struct Body {
 
 	void move(float deltaTime) { position += velocity * deltaTime; }
 
-	void collisionCheck(std::vector<Body> &bodies) {
-		for (Body& body : bodies) {
+	void collisionCheck(std::vector<Body> &bodies, bool combineOnCollision) {
+		for (int i = 0; i < bodies.size(); i++) {
+			Body& body = bodies[i];
+
 			if (&body == this) continue;
 
 			// Using distance formula get distance.
 			Vector2f deltaPosition = Vector2f(body.position) - position;
 			float distance = sqrt(deltaPosition.dot(deltaPosition));
 
-			if (distance < radius + body.radius) {
+			if (distance < radius + body.radius && !combineOnCollision) {
 				// Divide by zero check.
 				if (distance < 0.001f) distance = 0.01f;
 
@@ -102,6 +104,18 @@ struct Body {
 				// Now change the velocities.
 				velocity -= normalDeltaPosition * push / mass;
 				body.velocity += normalDeltaPosition * push / body.mass;
+			}
+			else if (distance < radius + body.radius && combineOnCollision) {
+				float maxMass = std::max(mass, body.mass);
+
+				// Get average position by mass.
+				Vector2f averagePosition = body.position / maxMass + position / maxMass;
+
+				// Delete the other body since its no longer needed.
+				bodies.erase(bodies.begin() + i);
+
+				position = averagePosition;
+
 			}
 		}
 	}
@@ -299,7 +313,7 @@ int main(int argc, char* argv[]) {
 				if (e.key.key == SDLK_UP) {
 					timeStep++;
 				}
-				if (e.key.key == SDLK_DOWN && timeStep > 0) {
+				if (e.key.key == SDLK_DOWN && timeStep > 1) {
 					timeStep--;
 				}
 			}
@@ -314,7 +328,7 @@ int main(int argc, char* argv[]) {
 				for (Body& body : bodies) body.move(deltaTime);
 
 				// Check collisions.
-				for (Body& body : bodies) body.collisionCheck(bodies);
+				for (Body& body : bodies) body.collisionCheck(bodies, combineMode);
 			}
 		}
 
@@ -341,7 +355,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
-		//SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Combine On Collision: " + std::string(combineMode ? "True" : "False")).c_str()); lineCount += 10;
 
 		// Create mode text.
 		if (createMode) {
