@@ -51,7 +51,7 @@ struct Body {
 			float distance = sqrt(deltaPosition.dot(deltaPosition));
 
 			// Make sure distances isn't 0.
-			if (distance < 0.1f) continue;
+			if (distance < 1.0f) continue;
 
 			// Get the gravitational force using Newton's gravity equation (Minus the gravitational constant).
 			float gravitationalForce = (body.mass * mass / (distance * distance)) * 150.0f; // Newtons
@@ -231,6 +231,7 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 	bool runSimulation = true;
 	bool createMode = false;
+	bool combineMode = true;
 	SDL_Event e;
 
 	// Main loop.
@@ -339,7 +340,8 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Simulation:"); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
-		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x").c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
+		//SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
 
 		// Create mode text.
 		if (createMode) {
