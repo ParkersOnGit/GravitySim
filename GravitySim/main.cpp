@@ -106,16 +106,18 @@ struct Body {
 				body.velocity += normalDeltaPosition * push / body.mass;
 			}
 			else if (distance < radius + body.radius && combineOnCollision) {
-				float maxMass = std::max(mass, body.mass);
+				// TODO: Instead of just at random, make the more mass-ful body take over the other one.
 
-				// Get average position by mass.
-				Vector2f averagePosition = body.position / maxMass + position / maxMass;
+				// Get average position by mass, and move the body.
+				Vector2f weightedPosition = (position * mass) + (body.position * body.mass);
+				Vector2f averagePosition = weightedPosition / (mass + body.mass);
+				position = averagePosition;
+
+				// Get the combined mass.
+				mass += body.mass;
 
 				// Delete the other body since its no longer needed.
 				bodies.erase(bodies.begin() + i);
-
-				position = averagePosition;
-
 			}
 		}
 	}
