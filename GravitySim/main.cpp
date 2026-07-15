@@ -338,8 +338,10 @@ int main(int argc, char* argv[]) {
 				for (Body& body : bodies) body.move(deltaTime);
 
 				// Check collisions.
-				for (int j = bodies.size() - 1; j >= 0; j--)
+				for (int j = bodies.size() - 1; j >= 0; j--) {
+					if (j > bodies.size() - 1) continue;
 					bodies[j].collisionCheck(bodies, combineMode);
+				}
 			}
 		}
 
