@@ -209,6 +209,29 @@ struct Body {
 	}
 };
 
+std::vector<Body> loadPreset(int presetID) {
+	std::vector<Body> bodies;
+
+	switch (presetID) {
+	case 0: // Nothing
+		break;
+	case 1: // Large area of uniformly spread objects.
+		Vector2f range = Vector2f(17500, 17500);
+		for (int i = 0; i < 1000; i++) {
+			Body newBody = {
+				{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
+				SDL_rand(15000) / 40.0f + 1,
+				SDL_rand(25) + 5,
+				{ SDL_rand(50) - 25, SDL_rand(50) - 25}
+			};
+			bodies.push_back(newBody);
+		}
+		break;
+	}
+
+	return bodies;
+}
+
 int main(int argc, char* argv[]) {
 	// Initialize SDL.
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -245,32 +268,14 @@ int main(int argc, char* argv[]) {
 	int creationSelection = 0;
 
 	// Create a vector of all bodies.
-	std::vector<Body> bodies;
+	int currentPreset = 0;
+	std::vector<Body> bodies = loadPreset(currentPreset);
 
-	Vector2f range = Vector2f(17500, 17500);
-
-	for (int i = 0; i < 1000; i++) {
-		Body newBody = {
-			{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
-			SDL_rand(15000) / 40.0f + 1,
-			SDL_rand(25) + 5,
-			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
-		};
-		bodies.push_back(newBody);
-	}
-	Body newBody = {
-		{0, 0},
-			100000,
-			500,
-			{ SDL_rand(50) - 25, SDL_rand(50) - 25}
-	};
-	//bodies.push_back(newBody);
 	// Useful variables.
 	Uint64 prevTime = SDL_GetPerformanceCounter();
 	Uint64 currentTime = 0;
 	float deltaTime = 0.0f;
 
-	int timeStep = 1;
 	bool running = true;
 	bool runSimulation = true;
 	bool createMode = false;
@@ -353,11 +358,13 @@ int main(int argc, char* argv[]) {
 					};
 					createMode = !createMode;
 				}
-				if (e.key.key == SDLK_UP) {
-					timeStep++;
+				if (e.key.key == SDLK_LEFT) {
+					currentPreset--;
+					bodies = loadPreset(currentPreset);
 				}
-				if (e.key.key == SDLK_DOWN && timeStep > 1) {
-					timeStep--;
+				if (e.key.key == SDLK_RIGHT) {
+					currentPreset++;
+					bodies = loadPreset(currentPreset);
 				}
 				if (e.key.key == SDLK_RETURN) {
 					if (createMode) {
@@ -369,18 +376,16 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (runSimulation && !createMode) {
-			for (int i = 0; i < timeStep; i++) {
-				// Update the bodies.
-				for (Body& body : bodies) body.update(bodies, deltaTime);
+			// Update the bodies.
+			for (Body& body : bodies) body.update(bodies, deltaTime);
 
-				// Move the bodies.
-				for (Body& body : bodies) body.move(deltaTime);
+			// Move the bodies.
+			for (Body& body : bodies) body.move(deltaTime);
 
-				// Check collisions.
-				for (int j = bodies.size() - 1; j >= 0; j--) {
-					if (j > bodies.size() - 1) continue;
-					bodies[j].collisionCheck(bodies, combineMode);
-				}
+			// Check collisions.
+			for (int j = bodies.size() - 1; j >= 0; j--) {
+				if (j > bodies.size() - 1) continue;
+				bodies[j].collisionCheck(bodies, combineMode);
 			}
 		}
 
@@ -407,14 +412,12 @@ int main(int argc, char* argv[]) {
 		lineCount += 10;
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Simulation:"); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str()); lineCount += 10;
-		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Combine On Collision: " + std::string(combineMode ? "True" : "False")).c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Preset: " + std::to_string(currentPreset)).c_str()); lineCount += 10;
 		lineCount += 10;
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Physics:"); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Total Mass: " + std::to_string(totalMass)).c_str()); lineCount += 10;
-
-
 
 		// Create mode text.
 		if (createMode) {
