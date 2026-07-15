@@ -67,7 +67,7 @@ struct Body {
 	void move(float deltaTime) { position += velocity * deltaTime; }
 
 	void collisionCheck(std::vector<Body> &bodies, bool combineOnCollision) {
-		for (int i = 0; i < bodies.size(); i++) {
+		for (int i = bodies.size() - 1; i >= 0; i--) {
 			Body& body = bodies[i];
 
 			if (&body == this) continue;
@@ -330,7 +330,8 @@ int main(int argc, char* argv[]) {
 				for (Body& body : bodies) body.move(deltaTime);
 
 				// Check collisions.
-				for (Body& body : bodies) body.collisionCheck(bodies, combineMode);
+				for (int j = bodies.size() - 1; j >= 0; j--)
+					bodies[j].collisionCheck(bodies, combineMode);
 			}
 		}
 
