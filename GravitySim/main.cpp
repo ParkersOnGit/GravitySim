@@ -347,6 +347,8 @@ int main(int argc, char* argv[]) {
 		SDL_RenderFillRect(renderer, &debugTextBackground);
 
 		int lineCount = 10;
+		float totalMass = 0.0f;
+		for (Body& body : bodies) totalMass += body.mass;
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Camera:"); lineCount += 10;
@@ -355,9 +357,14 @@ int main(int argc, char* argv[]) {
 		lineCount += 10;
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Simulation:"); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("State: " + std::string(runSimulation ? "Running" : "Paused")).c_str()); lineCount += 10;
-		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Time Step: " + std::to_string(timeStep) + "x [UNSTABLE]").c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Combine On Collision: " + std::string(combineMode ? "True" : "False")).c_str()); lineCount += 10;
+		lineCount += 10;
+		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Physics:"); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
+		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Total Mass: " + std::to_string(totalMass)).c_str()); lineCount += 10;
+
+
 
 		// Create mode text.
 		if (createMode) {
