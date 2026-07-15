@@ -228,9 +228,9 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	Vector2f range = Vector2f(2500, 2500);
+	Vector2f range = Vector2f(25000, 25000);
 
-	for (int i = 0; i < 500; i++) {
+	for (int i = 0; i < 1000; i++) {
 		Body newBody = {
 			{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
 			SDL_rand(15000) / 40.0f + 1,
