@@ -42,6 +42,8 @@ struct Body {
 	float radius; // Meters
 	Vector2f velocity; // Meters
 
+	std::vector<Vector2f> trail;
+
 	void update(const std::vector<Body> &bodies, float deltaTime) {
 		for (const Body &body : bodies) {
 			if (&body == this) continue;
@@ -64,7 +66,13 @@ struct Body {
 		}
 	}
 
-	void move(float deltaTime) { position += velocity * deltaTime; }
+	void move(float deltaTime) { 
+		position += velocity * deltaTime; 
+		trail.push_back(position);
+		if (trail.size() > 500) {
+			trail.erase(trail.begin());
+		}
+	}
 
 	void collisionCheck(std::vector<Body> &bodies, bool combineOnCollision) {
 		for (int i = bodies.size() - 1; i >= 0; i--) {
@@ -132,6 +140,17 @@ struct Body {
 
 	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
+
+		// Draw trail.
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		for (int i = 0; i < trail.size() - 1; i++) {
+			SDL_RenderLine(renderer, 
+				(trail[i].x - camera.position.x) * camera.zoom,
+				(trail[i].y - camera.position.y) * camera.zoom,
+				(trail[(i + 1) % trail.size()].x - camera.position.x) * camera.zoom,
+				(trail[(i + 1) % trail.size()].y - camera.position.y) * camera.zoom);
+		}
+
 		SDL_FColor massColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		std::vector<float> colorPosition = {
