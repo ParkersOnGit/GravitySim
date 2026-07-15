@@ -121,9 +121,6 @@ struct Body {
 				Vector2f averagePosition = weightedPosition / (mass + body.mass);
 				position = averagePosition;
 
-				// Get the combined mass.
-				mass += body.mass;
-
 				// Get the combined radius.
 				radius = sqrt((3.14159f * radius * radius + 3.14159f * body.radius * body.radius) / 3.14159f);
 
@@ -131,6 +128,9 @@ struct Body {
 				Vector2f weightedVelocity = (velocity * mass) + (body.velocity * body.mass);
 				Vector2f averageVelocity = weightedVelocity / (mass + body.mass);
 				velocity = averageVelocity;
+
+				// Get the combined mass.
+				mass += body.mass;
 
 				// Delete the other body since its no longer needed.
 				bodies.erase(bodies.begin() + i);
@@ -216,16 +216,24 @@ std::vector<Body> loadPreset(int presetID) {
 	case 0: // Nothing
 		break;
 	case 1: // Large area of uniformly spread objects.
-		Vector2f range = Vector2f(17500, 17500);
 		for (int i = 0; i < 1000; i++) {
 			Body newBody = {
-				{ SDL_rand(range.x) - range.x / 2, SDL_rand(range.y) - range.y / 2},
+				{ SDL_rand(17500) - 17500 / 2, SDL_rand(17500) - 17500 / 2},
 				SDL_rand(15000) / 40.0f + 1,
 				SDL_rand(25) + 5,
 				{ SDL_rand(50) - 25, SDL_rand(50) - 25}
 			};
 			bodies.push_back(newBody);
 		}
+		break;
+	case 2: // Planet like orbit with 3 moons.
+		bodies.push_back({ {0,0},50000,100,{0,0} });
+		bodies.push_back({ {300,0},20,8,{0,130} });
+		bodies.push_back({ {500,0},30,10,{0,100} });
+		bodies.push_back({ {700,0},15,6,{0,85} });
+		break;
+	case 3:
+		
 		break;
 	}
 
