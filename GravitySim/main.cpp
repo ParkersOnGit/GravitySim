@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-#include <iostream>
 
 #include <SDL3/SDL.h>
 
@@ -33,7 +32,7 @@ struct Vector2f {
 
 struct Camera {
 	Vector2f position = Vector2f(0.0f, 0.0f);
-	float zoom = 1.0f; // Not yet implemented. Do later!
+	float zoom = 1.0f;
 };
 
 struct Body {
@@ -114,8 +113,6 @@ struct Body {
 				body.velocity += normalDeltaPosition * push / body.mass;
 			}
 			else if (distance < radius + body.radius && combineOnCollision) {
-				// TODO: Instead of just at random, make the more mass-ful body take over the other one.
-
 				// Get average position by mass, and move the body.
 				Vector2f weightedPosition = (position * mass) + (body.position * body.mass);
 				Vector2f averagePosition = weightedPosition / (mass + body.mass);
@@ -141,6 +138,8 @@ struct Body {
 	void render(SDL_Renderer* renderer, const Camera &camera) {
 		const int resolution = 16;
 
+		// May add the trail option in the future.
+		
 		// Draw trail.
 		/*SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		for (int i = 0; i < trail.size() - 1; i++) {
@@ -392,6 +391,9 @@ int main(int argc, char* argv[]) {
 							selectedBody = &body;
 							break;
 						}
+						else {
+							selectedBody = nullptr;
+						}
 					}
 				}
 			}
@@ -420,7 +422,7 @@ int main(int argc, char* argv[]) {
 		// Debug text.
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 155);
-		SDL_FRect debugTextBackground = SDL_FRect(0, 0, 350, 100);
+		SDL_FRect debugTextBackground = SDL_FRect(0, 0, 350, 250);
 		SDL_RenderFillRect(renderer, &debugTextBackground);
 
 		int lineCount = 10;
@@ -441,7 +443,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Total Mass: " + std::to_string(totalMass)).c_str()); lineCount += 10;
 		lineCount += 10;
-		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Selected:"); lineCount += 10;
+		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Selected: [UNSTABLE]"); lineCount += 10;
 		if (selectedBody == nullptr) {
 			SDL_RenderDebugText(renderer, 20.0f, lineCount, "[NONE]"); lineCount += 10;
 		}
