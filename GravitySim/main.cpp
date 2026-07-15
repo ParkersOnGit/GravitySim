@@ -68,10 +68,10 @@ struct Body {
 
 	void move(float deltaTime) { 
 		position += velocity * deltaTime; 
-		trail.push_back(position);
+		/*trail.push_back(position);
 		if (trail.size() > 500) {
 			trail.erase(trail.begin());
-		}
+		}*/
 	}
 
 	void collisionCheck(std::vector<Body> &bodies, bool combineOnCollision) {
@@ -142,14 +142,14 @@ struct Body {
 		const int resolution = 16;
 
 		// Draw trail.
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		/*SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		for (int i = 0; i < trail.size() - 1; i++) {
 			SDL_RenderLine(renderer, 
 				(trail[i].x - camera.position.x) * camera.zoom,
 				(trail[i].y - camera.position.y) * camera.zoom,
 				(trail[(i + 1) % trail.size()].x - camera.position.x) * camera.zoom,
 				(trail[(i + 1) % trail.size()].y - camera.position.y) * camera.zoom);
-		}
+		}*/
 
 		SDL_FColor massColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
 	// Create a vector of all bodies.
 	std::vector<Body> bodies;
 
-	Vector2f range = Vector2f(25000, 25000);
+	Vector2f range = Vector2f(17500, 17500);
 
 	for (int i = 0; i < 1000; i++) {
 		Body newBody = {
@@ -301,17 +301,31 @@ int main(int argc, char* argv[]) {
 				if (e.key.key == SDLK_A) {
 					if (!createMode) camera.position.x -= 7.5f / camera.zoom;
 					else {
-
+						switch (creationSelection) {
+						case 0: creationBody.position.x -= 2.5f / camera.zoom; break;
+						case 1: creationBody.position.y -= 2.5f / camera.zoom; break;
+						case 2: creationBody.mass *= 0.9f; break;
+						case 3: creationBody.radius *= 0.9f; break;
+						case 4: creationBody.velocity.x -= 1; break;
+						case 5: creationBody.velocity.y -= 1; break;
+						}
 					}
 				}
 				if (e.key.key == SDLK_S) {
 					if (!createMode) camera.position.y += 7.5f / camera.zoom;
-					else if (creationSelection < 3) creationSelection++;
+					else if (creationSelection < 5) creationSelection++;
 				}
 				if (e.key.key == SDLK_D) {
 					if (!createMode) camera.position.x += 7.5f / camera.zoom;
 					else {
-
+						switch (creationSelection) {
+						case 0: creationBody.position.x += 2.5f / camera.zoom; break;
+						case 1: creationBody.position.y += 2.5f / camera.zoom; break;
+						case 2: creationBody.mass *= 1.1f; break;
+						case 3: creationBody.radius *= 1.1f; break;
+						case 4: creationBody.velocity.x += 1; break;
+						case 5: creationBody.velocity.y += 1; break;
+						}
 					}
 				}
 				if (e.key.key == SDLK_E) {
@@ -332,7 +346,7 @@ int main(int argc, char* argv[]) {
 				}
 				if (e.key.key == SDLK_C) {
 					creationBody = Body{
-						{ camera.position.x + w / 2.0f, -camera.position.y + h / 2.0f},
+						camera.position + Vector2f(w, h) / 2.0f / camera.zoom,
 						1.0f,
 						16.0f,
 						{ 0.0f, 0.0f }
@@ -344,6 +358,12 @@ int main(int argc, char* argv[]) {
 				}
 				if (e.key.key == SDLK_DOWN && timeStep > 1) {
 					timeStep--;
+				}
+				if (e.key.key == SDLK_RETURN) {
+					if (createMode) {
+						bodies.push_back(creationBody);
+						createMode = !createMode;
+					}
 				}
 			}
 		}
@@ -405,11 +425,13 @@ int main(int argc, char* argv[]) {
 
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset, "Creation Mode");
-			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 20, ("Position: (" + std::to_string(creationBody.position.x) + ", " + std::to_string(creationBody.position.y) + ")").c_str());
-			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 30, ("Mass: " + std::to_string(creationBody.mass)).c_str());
-			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 40, ("Radius: " + std::to_string(creationBody.radius)).c_str());
-			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 50, ("Velocity: (" + std::to_string(creationBody.velocity.x) + ", " + std::to_string(creationBody.velocity.y) + ")").c_str());
-
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 20, ("Position: (" + std::to_string(creationBody.position.x) + ", ").c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 30, ("           " + std::to_string(creationBody.position.y) + ")").c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 40, ("Mass: " + std::to_string(creationBody.mass)).c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 50, ("Radius: " + std::to_string(creationBody.radius)).c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 60, ("Velocity: (" + std::to_string(creationBody.velocity.x) + ", ").c_str());
+			SDL_RenderDebugText(renderer, w / 2.0f + xOffset, h / 2.0f + yOffset + 70, ("           " + std::to_string(creationBody.velocity.y) + ")").c_str());
+			
 			// Selection cursor.
 			SDL_FRect debugTextBackground = SDL_FRect(w / 2.0f + xOffset - 10, h / 2.0f + yOffset + 18 + creationSelection * 10, 5, 10);
 			SDL_RenderFillRect(renderer, &debugTextBackground);
