@@ -116,6 +116,9 @@ struct Body {
 				// Get the combined mass.
 				mass += body.mass;
 
+				// Get the combined radius.
+				radius = sqrt((3.14159f * radius * radius + 3.14159f * body.radius * body.radius) / 3.14159f);
+
 				// Delete the other body since its no longer needed.
 				bodies.erase(bodies.begin() + i);
 			}
