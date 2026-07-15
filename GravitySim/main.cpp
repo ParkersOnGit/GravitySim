@@ -119,6 +119,11 @@ struct Body {
 				// Get the combined radius.
 				radius = sqrt((3.14159f * radius * radius + 3.14159f * body.radius * body.radius) / 3.14159f);
 
+				// Get the average velocity.
+				Vector2f weightedVelocity = (velocity * mass) + (body.velocity * body.mass);
+				Vector2f averageVelocity = weightedVelocity / (mass + body.mass);
+				velocity = averageVelocity;
+
 				// Delete the other body since its no longer needed.
 				bodies.erase(bodies.begin() + i);
 			}
