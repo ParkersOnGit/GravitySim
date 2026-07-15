@@ -232,9 +232,6 @@ std::vector<Body> loadPreset(int presetID) {
 		bodies.push_back({ {500,0},30,10,{0,100} });
 		bodies.push_back({ {700,0},15,6,{0,85} });
 		break;
-	case 3:
-		
-		break;
 	}
 
 	return bodies;
@@ -274,6 +271,9 @@ int main(int argc, char* argv[]) {
 	// Creation mode body.
 	Body creationBody;
 	int creationSelection = 0;
+
+	// Selection pointer.
+	Body* selectedBody = nullptr;
 
 	// Create a vector of all bodies.
 	int currentPreset = 0;
@@ -381,6 +381,20 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
+			if (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+				if (e.button.button == SDL_BUTTON_RIGHT) {
+					Vector2f mousePos = { e.button.x, e.button.y };
+					Vector2f selectionPosition = camera.position + mousePos / camera.zoom;
+					for (Body& body : bodies) {
+						Vector2f deltaPosition = Vector2f(body.position) - selectionPosition;
+						float distance = sqrt(deltaPosition.dot(deltaPosition));
+						if (distance < body.radius) {
+							selectedBody = &body;
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		if (runSimulation && !createMode) {
@@ -426,6 +440,18 @@ int main(int argc, char* argv[]) {
 		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Physics:"); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Body Count: " + std::to_string(bodies.size())).c_str()); lineCount += 10;
 		SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Total Mass: " + std::to_string(totalMass)).c_str()); lineCount += 10;
+		lineCount += 10;
+		SDL_RenderDebugText(renderer, 10.0f, lineCount, "Selected:"); lineCount += 10;
+		if (selectedBody == nullptr) {
+			SDL_RenderDebugText(renderer, 20.0f, lineCount, "[NONE]"); lineCount += 10;
+		}
+		else {
+			SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Pos: (" + std::to_string(selectedBody->position.x) + ", " + std::to_string(selectedBody->position.y) + ")").c_str()); lineCount += 10;
+			SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Mass: " + std::to_string(selectedBody->mass)).c_str()); lineCount += 10;
+			SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Radius: " + std::to_string(selectedBody->radius)).c_str()); lineCount += 10;
+			SDL_RenderDebugText(renderer, 20.0f, lineCount, ("Vel: (" + std::to_string(selectedBody->velocity.x) + ", " + std::to_string(selectedBody->velocity.y) + ")").c_str()); lineCount += 10;
+		}
+
 
 		// Create mode text.
 		if (createMode) {
