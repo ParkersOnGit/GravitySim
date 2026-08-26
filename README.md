@@ -4,7 +4,7 @@
 
 <img src="Images/BodyFieldCombineDemo.gif" alt="Body Field Demo Gif" width="350px">
 
-[![YouTube Devlog](https://img.shields.io/badge/YouTube-Devlog-grey?logo=youtube&logoColor=white&labelColor=red)](https://www.youtube.com/watch?v=NotHereYet)
+[![YouTube Devlog](https://img.shields.io/badge/YouTube-Devlog-grey?logo=youtube&logoColor=white&labelColor=red)](https://www.youtube.com/watch?v=UBYKAQI-cYc)
 
 ## Features
 - Newtonian Gravity
