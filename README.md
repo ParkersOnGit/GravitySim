@@ -40,10 +40,8 @@ Built using Visual Studio 26 Insider Edition.
 SDL3 is included with this project.
 
 1. Clone the repository
-2. Download SDL3 and copy `lib` folder to `external/SDL3`
-3. Open `GravitySim.slnx` in Visual Studio
-4. Build the solution
-5. Run the executable
+2. Open `GravitySim.slnx` in Visual Studio
+3. Build and run the solution
 
 ## Additional Notes
 
