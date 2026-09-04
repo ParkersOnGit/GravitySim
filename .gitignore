@@ -34,9 +34,9 @@ bld/
 [Ll]ogs/
 
 # Make sure to not get rid of lib files for SDL3.
-!external/SDL3/lib/x64/
-!external/SDL3/lib/x86/
-!external/SDL3/lib/[Aa][Rr][Mm]64/
+!GravitySim/external/SDL3/lib/x64/
+!GravitySim/external/SDL3/lib/x86/
+!GravitySim/external/SDL3/lib/[Aa][Rr][Mm]64/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
